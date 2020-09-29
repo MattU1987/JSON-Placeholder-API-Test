@@ -1,0 +1,813 @@
+{
+	"info": {
+		"_postman_id": "7bbf8bc7-1f0b-47af-a4ad-45b54fe413d0",
+		"name": "JSON Placeholder API Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "API Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4b6df453-21ec-4073-b570-e44dc2f23829",
+						"exec": [
+							"pm.test('API Health Check should Pass', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					]
+				},
+				"description": "Check API is up and running"
+			},
+			"response": []
+		},
+		{
+			"name": "Post field type check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3f72a38f-22e4-4375-b5fb-412f27216acf",
+						"exec": [
+							"pm.test('Posts 1 Health Check', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"console.log(response);\r",
+							"console.log(typeof(response.userId));\r",
+							"console.log(typeof(response.id));\r",
+							"console.log(typeof(response.title));\r",
+							"console.log(typeof(response.body));\r",
+							"\r",
+							"\r",
+							"pm.test('user ID is a number and set User ID to variable', function() {\r",
+							"    pm.environment.set(\"userId\", response.userId);\r",
+							"    pm.expect(response.userId).to.be.a('number');\r",
+							"})\r",
+							"\r",
+							"pm.test('ID is a number and set ID to variable', function() {\r",
+							"    pm.environment.set(\"postId\", response.id);\r",
+							"    pm.expect(response.id).to.be.a('number');\r",
+							"})\r",
+							"\r",
+							"pm.test('Title is a string and set Title to variable', function() {\r",
+							"    pm.environment.set(\"postTitle\", response.title);\r",
+							"    pm.expect(response.title).to.be.a('string');\r",
+							"})\r",
+							"\r",
+							"pm.test('Body is a string and set Body to variable', function() {\r",
+							"    pm.environment.set(\"postBody\", response.body);\r",
+							"    pm.expect(response.body).to.be.a('string');\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts/1",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts",
+						"1"
+					]
+				},
+				"description": "Check a specific post can be retreived (currently hardcoded to post 1 but URL can be amended to check any of the 100 available)\r\nLog the type of data that is currently saved in each field and check them using a test\r\nSave all data points from the response to confirm the post is displayed in /posts when called (this test would be utalised again if it was possible to put new data into the database and be called back)"
+			},
+			"response": []
+		},
+		{
+			"name": "Saved Post Exists in Posts Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "774a426c-5190-4ff3-9d63-049f65846f02",
+						"exec": [
+							"pm.test('Posts Health Check', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"const post = response.find(item => item.id === pm.environment.get(\"postId\"));\r",
+							"\r",
+							"console.log(post);\r",
+							"\r",
+							"pm.test('Post is present in Posts', function() {\r",
+							"    pm.expect(post.userId).to.eql(pm.environment.get(\"userId\"));\r",
+							"    pm.expect(post.id).to.eql(pm.environment.get(\"postId\"));\r",
+							"    pm.expect(post.body).to.eql(pm.environment.get(\"postBody\"));\r",
+							"    pm.expect(post.title).to.eql(pm.environment.get(\"postTitle\"));\r",
+							"})\r",
+							"\r",
+							"console.log(response.filter(item => item.userId === pm.environment.get(\"userId\")))\r",
+							"const userPosts = response.filter(item => item.userId === pm.environment.get(\"userId\"))\r",
+							"console.log(userPosts.length)\r",
+							"pm.environment.set(\"numberOfPostsByUser\",userPosts.length)\r",
+							"\r",
+							"console.log(response.length);\r",
+							"pm.environment.set(\"numberOfPosts\", response.length);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Confirm user is able to list all posts currently availble\r\nConfrim post saved from previous call is present in full list\r\nExtract number of posts that are currenlty on the system to confirm when a new post is added it takes the expected ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Post Success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5cf00831-514f-427d-882e-161400778591",
+						"exec": [
+							"pm.test('Create New Post Success', function(){\r",
+							"    pm.response.to.have.status(201)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"console.log(pm.environment.get(\"numberOfPosts\")+1);\r",
+							"\r",
+							"pm.test('Post data is saved correctly and Id increased by 1', function() {\r",
+							"    pm.expect(response.userId).to.eql(pm.environment.get(\"userId\"));\r",
+							"    pm.expect(response.id).to.eql(pm.environment.get(\"numberOfPosts\")+1);\r",
+							"    pm.expect(response.body).to.eql(\"TEST\");\r",
+							"    pm.expect(response.title).to.eql(pm.environment.get(\"postTitle\"));\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{userId}},\r\n    \"title\": \"{{postTitle}}\",\r\n    \"body\": \"TEST\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Create a new post succesfully using variables previsouly captured (unable to use saved body variable due to causing 500 error so has been hard coded to TEST)\r\nConfrim new post has ID 1 greater than current number of posts\r\nIdeally would update all variables and run Saved Post Exists in Posts Check again to confirm has been created succesfully but limitations of API prevent this"
+			},
+			"response": []
+		},
+		{
+			"name": "Count Users in the system",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a1220202-815b-4468-b019-f4d08dd12305",
+						"exec": [
+							"pm.test('Users Health Check', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"console.log(response.length);\r",
+							"pm.environment.set(\"numberOfUsers\", response.length);\r",
+							"pm.environment.set(\"numberOfUsers+1\", response.length + 1);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/users",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"users"
+					]
+				},
+				"description": "Confirm users api is up and running\r\nFind out how many users are currenlty present in the system and set it to a variable"
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Post Failure - User does not exist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2b0d6ba3-0c2c-4caa-a352-47d370964c97",
+						"exec": [
+							"pm.test('Create New Post Failure - User ID Number', function(){\r",
+							"    pm.response.to.not.have.status(201)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{numberOfUsers+1}},\r\n    \"title\": \"{{postTitle}}\",\r\n    \"body\": \"TEST\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Attempt to Create a new post using a user that does not exist in the system using the variable captured from count users in the system\r\nIdeally would run this to give a failed status (403 I believe but have coded to not be a succesfull 201 status) and then add in a user and use that user to create a new post again succesfully but limitations of API prevent this"
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Post Failure - Incorrect userId type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a675341d-3813-46af-90f5-363aabaa33c6",
+						"exec": [
+							"pm.test('Create New Post Failure - User ID Type', function(){\r",
+							"    pm.response.to.not.have.status(201)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"TEST\",\r\n    \"title\": \"{{postTitle}}\",\r\n    \"body\": \"TEST\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Attempt to Create a new post using an incorrect type for the userId field (string instead of number)\r\nIdeally would run this to give a failed status (403 I believe but have coded to not be a succesfull 201 status)"
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Post Failure - Incorrect title type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "98493ecc-07c7-4101-8501-b7f2859a7983",
+						"exec": [
+							"pm.test('Create New Post Failure', function(){\r",
+							"    pm.response.to.not.have.status(201)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{numberOfUsers+1}},\r\n    \"title\": 1,\r\n    \"body\": \"TEST\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Attempt to Create a new post using an incorrect type for the title field (number instead of string)\r\nIdeally would run this to give a failed status (403 I believe but have coded to not be a succesfull 201 status)"
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Post Failure - Incorrect body type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5563a513-f1e9-43fd-9893-f916d6cb27b8",
+						"exec": [
+							"pm.test('Create New Post Failure', function(){\r",
+							"    pm.response.to.not.have.status(201)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": {{numberOfUsers+1}},\r\n    \"title\": \"{{postTitle}}\",\r\n    \"body\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Attempt to Create a new post using an incorrect type for the \"body\" field (number instead of string)\r\nIdeally would run this to give a failed status (403 I believe but have coded to not be a succesfull 201 status)"
+			},
+			"response": []
+		},
+		{
+			"name": "Post 1 Update Succesful",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f6462317-e588-487b-9a9a-709f92b237f3",
+						"exec": [
+							"pm.test('Posts 1 Update Succesful', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test('Post can be updated', function() {\r",
+							"    pm.expect(response.userId).to.eql(10);\r",
+							"    pm.expect(response.body).to.eql(\"Test Body\");\r",
+							"    pm.expect(response.title).to.eql(\"Test Title\");\r",
+							"})\r",
+							"\r",
+							"pm.test('Post ID is not updated'), function() {\r",
+							"    pm.expect(response.id).to.eql(pm.environment.get(\"postId\"))\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": 10,\r\n    \"id\": 101,\r\n    \"title\": \"Test Title\",\r\n    \"body\": \"Test Body\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts/{{postId}}",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts",
+						"{{postId}}"
+					]
+				},
+				"description": "Confirm user is able to update User ID, Title and Body of a post and Post ID should not be able to be updated.\r\nIdeally if API allowed it Post Varilables would be stored again and then confirmed to have been updated from /posts call"
+			},
+			"response": []
+		},
+		{
+			"name": "Post 1 Deleted Succesfully",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d5da272a-839f-4152-8c32-36dd41475e46",
+						"exec": [
+							"pm.test('Posts 1 Update Succesful', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts/{{postId}}",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts",
+						"{{postId}}"
+					]
+				},
+				"description": "Confirm user is able to delete a Post.\r\nIdeally if API allowed it Post would be deleted and another test could be run to confirm that navigating to the same url would result in 404 error."
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Posts by User ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5e7f6bc1-5ce0-459f-9465-de3d7a297ff7",
+						"exec": [
+							"pm.test('Filter Posts by User ID Success', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"console.log(response.length)\r",
+							"\r",
+							"pm.test('Correct number of Posts Displayed', function() {\r",
+							"    pm.expect(response.length).to.eql(pm.environment.get(\"numberOfPostsByUser\"));\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts?userId={{userId}}",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{userId}}"
+						}
+					]
+				},
+				"description": "Confirm user is able to filter posts by a specific User ID and confirm the number is the same as previously captured"
+			},
+			"response": []
+		},
+		{
+			"name": "Comments Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e38cf715-bb84-4155-adb7-41a7e6566258",
+						"exec": [
+							"pm.test('Comments Health Check should Pass', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"console.log(response.length)\r",
+							"\r",
+							"pm.environment.set(\"numberOfComments\",response.length);\r",
+							"pm.environment.set(\"numberOfCommentsPlus1\",response.length+1)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/comments",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"comments"
+					]
+				},
+				"description": "Check Comments are up and running and store how many comments currently exist on the system"
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Comments by Post ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ed58f2aa-88c3-4d20-aee2-d10a953a66ca",
+						"exec": [
+							"pm.test('Comments Health Check should Pass', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"console.log(response.length)\r",
+							"\r",
+							"pm.environment.set(\"numberOfCommentsOnPost\",response.length);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/comments?postId={{postId}}",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"comments"
+					],
+					"query": [
+						{
+							"key": "postId",
+							"value": "{{postId}}"
+						}
+					]
+				},
+				"description": "Find the total number of Comments relaing to a specific Post ID to confirm when looking at the nested resource"
+			},
+			"response": []
+		},
+		{
+			"name": "Posts 1 Comments Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "65574483-9201-4df6-995b-2592e21342ab",
+						"exec": [
+							"pm.test('Health Check should Pass', function(){\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"console.log(response.length);\r",
+							"\r",
+							"pm.test(\"Number of Comments Check\", function(){\r",
+							"    pm.expect(response.length).to.eql(pm.environment.get(\"numberOfCommentsOnPost\"));\r",
+							"})\r",
+							"\r",
+							"const comment = response.find(item => item.id === pm.environment.get(\"postId\"));\r",
+							"console.log(typeof(comment.postId));\r",
+							"console.log(typeof(comment.id));\r",
+							"console.log(typeof(comment.name));\r",
+							"console.log(typeof(comment.email));\r",
+							"console.log(typeof(comment.body));\r",
+							"\r",
+							"\r",
+							"pm.environment.set(\"commentPostIdType\", typeof(comment.postId));\r",
+							"pm.environment.set(\"commentIdType\", typeof(comment.id));\r",
+							"pm.environment.set(\"commentNameType\", typeof(comment.name));\r",
+							"pm.environment.set(\"commentEmailType\", typeof(comment.email));\r",
+							"pm.environment.set(\"commentBodyType\", typeof(comment.body));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts/{{postId}}/comments",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts",
+						"{{postId}}",
+						"comments"
+					]
+				},
+				"description": "Confirm Posts/{{postID}}/comments is up and running.\r\nConfirm number of comments currently included on the Post is the same as extracted using the Filtering of /Comments"
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Comment to a specific Post",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "92c8b9e2-5edc-40b7-bf20-ee666f1bdc57",
+						"exec": [
+							"pm.test('Health Check should Pass', function(){\r",
+							"    pm.response.to.have.status(201)\r",
+							"})\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test('Name is a String', function() {\r",
+							"    pm.expect(response.name).to.be.a(pm.environment.get(\"commentNameType\"));\r",
+							"})\r",
+							"\r",
+							"pm.test('Email is a String', function() {\r",
+							"    pm.expect(response.email).to.be.a(pm.environment.get(\"commentEmailType\"));\r",
+							"})\r",
+							"\r",
+							"pm.test('Body is a String', function() {\r",
+							"    pm.expect(response.body).to.be.a(pm.environment.get(\"commentBodyType\"));\r",
+							"})\r",
+							"\r",
+							"pm.test('Post ID is a Number', function() {\r",
+							"    pm.expect(response.postId).to.be.a(pm.environment.get(\"commentPostIdType\"));\r",
+							"})\r",
+							"\r",
+							"pm.test('Post ID is {{postId}}', function() {\r",
+							"    pm.expect(response.postId).to.eql(pm.environment.get(\"postId\"));\r",
+							"})\r",
+							"\r",
+							"pm.test('ID is a Number', function() {\r",
+							"    pm.expect(response.id).to.be.a(pm.environment.get(\"commentIdType\"));\r",
+							"})\r",
+							"\r",
+							"pm.test('ID is {{numberOfCommentsPlus1}}', function() {\r",
+							"    pm.expect(response.id).to.eql(pm.environment.get(\"numberOfCommentsPlus1\"));\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\": \"Test Name\",\r\n        \"email\": \"Test@email.com\",\r\n        \"body\": \"Test Body\"\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts/{{postId}}/comments",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts",
+						"{{postId}}",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
